@@ -62,7 +62,7 @@
             let lon = position.coords.longitude.toFixed(6);
             document.getElementById("location").innerText = `إحداثياتك: ${lat}, ${lon}`;
             
-            if (Math.abs(lat - 30.595747) <= 0.001 && Math.abs(lon - 31.510387) <= 0.001) {
+            if (Math.abs(lat - 30.754925064315273) <= 0.001 && Math.abs(lon - 31.916710185738847) <= 0.001) {
                 document.querySelector(".container").style.display = "block";
             } else {
                 document.getElementById("location").innerText = "أنت خارج النطاق المسموح به.";
