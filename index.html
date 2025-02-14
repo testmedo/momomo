@@ -56,7 +56,7 @@
     <script>
         const targetLat = 30.754935472761662;
         const targetLon = 31.91680752425341;
-        const tolerance = 1.0; // المسافة المسموح بها بالكيلومترات
+        const tolerance = 1.0;
 
         function getLocation() {
             if (navigator.geolocation) {
@@ -84,7 +84,7 @@
         }
 
         function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // نصف قطر الأرض بالكيلومترات
+            const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -108,9 +108,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        document.getElementById("form-content").innerHTML = "فورم الغياب غير موجود.";
+                        document.getElementById("form-content").innerHTML = "<p>فورم الغياب غير موجود.</p>";
                     } else {
-                        document.getElementById("form-content").innerHTML = `<pre>${JSON.stringify(data.fields, null, 2)}</pre>`;
+                        let fields = data.fields;
+                        let formHTML = "";
+                        for (let key in fields) {
+                            formHTML += `<label>${key}: <input type='text' id='${key}' value='${fields[key].stringValue || ""}'></label><br>`;
+                        }
+                        document.getElementById("form-content").innerHTML = formHTML;
                     }
                 })
                 .catch(error => {
@@ -120,13 +125,12 @@
 
         function sendFormData() {
             let formName = document.getElementById("formName").value;
-            let dataToSend = {
-                fields: {
-                    name: { stringValue: "محمد" },
-                    class_group: { stringValue: "المجموعة أ" },
-                    section: { stringValue: "القسم 1" }
-                }
-            };
+            let inputs = document.querySelectorAll("#form-content input");
+            let dataToSend = { fields: {} };
+            inputs.forEach(input => {
+                dataToSend.fields[input.id] = { stringValue: input.value };
+            });
+            
             fetch(`https://firestore.googleapis.com/v1/projects/fletfirestoreapp/databases/(default)/documents/Absenceout/${formName}/students`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
