@@ -3,20 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحديد الموقع بدقة</title>
+    <title>نموذج الغياب</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h2>موقعك الحالي:</h2>
-    <p id="location">جاري تحديد موقعك...</p>
+    <div class="container">
+        <h2>تحقق من فورم الغياب</h2>
+        <p id="location">جاري تحديد موقعك...</p>
+        <input type="text" id="formName" placeholder="أدخل اسم فورم الغياب">
+        <button onclick="checkForm()">عرض البيانات</button>
+        <div id="result"></div>
+    </div>
 
     <script>
         function getLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError, {
-                    enableHighAccuracy: true,  // استخدام أعلى دقة متاحة
-                    timeout: 10000,  // المهلة القصوى 10 ثوانٍ
-                    maximumAge: 0  // عدم استخدام بيانات قديمة
-                });
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
             } else {
                 document.getElementById("location").innerText = "المتصفح لا يدعم تحديد الموقع.";
             }
@@ -25,46 +60,38 @@
         function showPosition(position) {
             let lat = position.coords.latitude.toFixed(6);
             let lon = position.coords.longitude.toFixed(6);
-
-            document.getElementById("location").innerHTML = `إحداثياتك: ${lat}, ${lon}`;
-
-            // إرسال الإحداثيات إلى OpenCage API
-            let apiKey = "080b905eb3d24403af485a883ad3abc3";
-            let url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${apiKey}&language=ar`;
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.results.length > 0) {
-                        let locationInfo = data.results[0].formatted;
-                        document.getElementById("location").innerHTML += `<br>الموقع: ${locationInfo}`;
-                    } else {
-                        document.getElementById("location").innerHTML += "<br>تعذر العثور على اسم الموقع.";
-                    }
-                })
-                .catch(error => {
-                    console.error("حدث خطأ:", error);
-                    document.getElementById("location").innerHTML += "<br>فشل في جلب الموقع.";
-                });
+            document.getElementById("location").innerText = `إحداثياتك: ${lat}, ${lon}`;
+            
+            if (Math.abs(lat - 30.595747) <= 0.001 && Math.abs(lon - 31.510387) <= 0.001) {
+                document.querySelector(".container").style.display = "block";
+            } else {
+                document.getElementById("location").innerText = "أنت خارج النطاق المسموح به.";
+            }
         }
 
         function showError(error) {
-            let errorMsg = "تعذر تحديد الموقع.";
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMsg = "تم رفض إذن تحديد الموقع.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMsg = "معلومات الموقع غير متوفرة.";
-                    break;
-                case error.TIMEOUT:
-                    errorMsg = "انتهت مهلة طلب الموقع.";
-                    break;
-            }
-            document.getElementById("location").innerText = errorMsg;
+            document.getElementById("location").innerText = "تعذر تحديد الموقع.";
         }
 
-        // تشغيل تحديد الموقع تلقائيًا عند تحميل الصفحة
+        function checkForm() {
+            let formName = document.getElementById("formName").value;
+            let firebaseUrl = `https://firestore.googleapis.com/v1/projects/fletfirestoreapp/databases/(default)/documents/Absence/${formName}`;
+            
+            fetch(firebaseUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("فورم الغياب غير موجود");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById("result").innerText = "تم العثور على فورم الغياب!";
+                })
+                .catch(error => {
+                    document.getElementById("result").innerText = error.message;
+                });
+        }
+
         window.onload = getLocation;
     </script>
 </body>
