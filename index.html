@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحديد الموقع تلقائيًا</title>
+</head>
+<body>
+    <h2>موقعك الحالي:</h2>
+    <p id="location">جاري تحديد موقعك...</p>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                document.getElementById("location").innerText = "المتصفح لا يدعم تحديد الموقع.";
+            }
+        }
+
+        function showPosition(position) {
+            let lat = position.coords.latitude.toFixed(5);
+            let lon = position.coords.longitude.toFixed(5);
+
+            document.getElementById("location").innerHTML = `إحداثياتك: ${lat}, ${lon}`;
+
+            // إرسال الإحداثيات إلى OpenCage API
+            let apiKey = "080b905eb3d24403af485a883ad3abc3";
+            let url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${apiKey}&language=ar`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let locationInfo = data.results[0].formatted;
+                    document.getElementById("location").innerHTML += `<br>الموقع: ${locationInfo}`;
+                })
+                .catch(error => console.error("حدث خطأ:", error));
+        }
+
+        function showError(error) {
+            let errorMsg = "تعذر تحديد الموقع.";
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg = "تم رفض طلب تحديد الموقع.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg = "معلومات الموقع غير متوفرة.";
+                    break;
+                case error.TIMEOUT:
+                    errorMsg = "انتهت مهلة طلب الموقع.";
+                    break;
+            }
+            document.getElementById("location").innerText = errorMsg;
+        }
+
+        // تشغيل تحديد الموقع تلقائيًا عند تحميل الصفحة
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
