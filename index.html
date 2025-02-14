@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحديد الموقع تلقائيًا</title>
+    <title>تحديد الموقع بدقة</title>
 </head>
 <body>
     <h2>موقعك الحالي:</h2>
@@ -12,15 +12,19 @@
     <script>
         function getLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
+                navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                    enableHighAccuracy: true,  // استخدام أعلى دقة متاحة
+                    timeout: 10000,  // المهلة القصوى 10 ثوانٍ
+                    maximumAge: 0  // عدم استخدام بيانات قديمة
+                });
             } else {
                 document.getElementById("location").innerText = "المتصفح لا يدعم تحديد الموقع.";
             }
         }
 
         function showPosition(position) {
-            let lat = position.coords.latitude.toFixed(5);
-            let lon = position.coords.longitude.toFixed(5);
+            let lat = position.coords.latitude.toFixed(6);
+            let lon = position.coords.longitude.toFixed(6);
 
             document.getElementById("location").innerHTML = `إحداثياتك: ${lat}, ${lon}`;
 
@@ -31,17 +35,24 @@
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    let locationInfo = data.results[0].formatted;
-                    document.getElementById("location").innerHTML += `<br>الموقع: ${locationInfo}`;
+                    if (data.results.length > 0) {
+                        let locationInfo = data.results[0].formatted;
+                        document.getElementById("location").innerHTML += `<br>الموقع: ${locationInfo}`;
+                    } else {
+                        document.getElementById("location").innerHTML += "<br>تعذر العثور على اسم الموقع.";
+                    }
                 })
-                .catch(error => console.error("حدث خطأ:", error));
+                .catch(error => {
+                    console.error("حدث خطأ:", error);
+                    document.getElementById("location").innerHTML += "<br>فشل في جلب الموقع.";
+                });
         }
 
         function showError(error) {
             let errorMsg = "تعذر تحديد الموقع.";
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    errorMsg = "تم رفض طلب تحديد الموقع.";
+                    errorMsg = "تم رفض إذن تحديد الموقع.";
                     break;
                 case error.POSITION_UNAVAILABLE:
                     errorMsg = "معلومات الموقع غير متوفرة.";
