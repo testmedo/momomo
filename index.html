@@ -104,7 +104,7 @@
                 alert("يرجى إدخال اسم فورم الغياب");
                 return;
             }
-            fetch(`https://firestore.googleapis.com/v1/projects/fletfirestoreapp/databases/(default)/documents/Absence/${formName}`)
+            fetch(`https://firestore.googleapis.com/v1/projects/absence-d1cca/databases/(default)/documents/Absence/${formName}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -131,7 +131,7 @@
                 dataToSend.fields[input.id] = { stringValue: input.value };
             });
             
-            fetch(`https://firestore.googleapis.com/v1/projects/fletfirestoreapp/databases/(default)/documents/Absenceout/${formName}/students`, {
+            fetch(`https://firestore.googleapis.com/v1/projects/absence-d1cca/databases/(default)/documents/Absenceout/${formName}/students`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(dataToSend)
