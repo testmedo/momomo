@@ -108,7 +108,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        document.getElementById("form-content").innerHTML = "<p>فورم الغياب غير موجود.</p>";
+                        document.getElementById("form-content").innerHTML = "<p>\nفورم الغياب غير موجود.</p>";
                     } else {
                         let fields = data.fields;
                         let formHTML = "";
