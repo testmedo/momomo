@@ -54,8 +54,8 @@
     </div>
 
     <script>
-        const targetLat = 30.751630907097507;  
-        const targetLon = 31.917600914495367;
+       const targetLat = 30.595612435421916;  
+        const targetLon = 31.510278862438106;
         const tolerance = 0.5;
 
         function getLocation() {
@@ -79,7 +79,7 @@
             if (distance <= tolerance) {
                 document.getElementById("form-container").style.display = "block";
             } else {
-                document.getElementById("location").innerText += "\nأنت خارج النطاق المسموح به.";
+                document.getElementById("location").innerText += "أنت خارج النطاق المسموح به.";
             }
         }
 
