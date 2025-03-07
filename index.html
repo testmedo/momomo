@@ -3,147 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحديد الموقع ورفع الغياب</title>
+    <title>موقع الكليات</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            margin: 0;
+            padding: 0;
             background-color: #f4f4f4;
+        }
+        header {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #004080;
+        }
+        header img {
+            width: 50px;
         }
         .container {
-            background: white;
             padding: 20px;
+            padding-bottom: 80px; /* لضمان عدم اختفاء آخر عنصر بسبب الفوتر */
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            margin: 10px;
             border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+        .dropdown {
+            position: relative;
+            display: inline-block;
         }
-        button {
-            background-color: #28a745;
+        .dropdown button {
+            background-color: #004080;
             color: white;
+            border: none;
+            padding: 10px 20px;
             cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: 0.3s;
         }
-        button:hover {
-            background-color: #218838;
+        .dropdown button:hover {
+            background-color: #002050;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 150px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 100;
+        }
+        .dropdown-content a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: black;
+            transition: 0.3s;
+        }
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        footer {
+            background-color: #004080;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="location-container">
-        <h2>موقعك الحالي:</h2>
-        <p id="location">جاري تحديد موقعك...</p>
+    <header>
+        <img src="..\location\photo\photo_2025-02-18_19-50-28.jpg" alt="Logo Right">
+        <img src="..\location\photo\photo_2025-01-26_08-06-32.jpg" alt="Logo Left">
+    </header>
+    <div class="container">
+        <h2>حدد كليتك التي تنتمي لها لتسجيل غيابك </h2>
+        
+        <div class="card">
+            <h3>الكليات التربوية</h3>
+            <div class="dropdown">
+                <button>اختر كلية</button>
+                <div class="dropdown-content">
+                    <a href="FacultyofQualitativeEducation.html">كلية التربية النوعية</a>
+                    <a href="Faculty of Education.html">كلية التربية</a>
+                    <a href="Faculty of Physical Education for Girls.html">كلية التربية الرياضية بنات </a>
+                    <a href="Faculty of Physical Education.html">كلية التربية الرياضية بنين</a>
+                    <a href="Faculty of Law.html">كلية الحقوق</a>
+                    <a href="Faculty of Graduate Asian Studies.html">كلية الدراسات الآسيوية العليا</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>الكليات الطبية</h3>
+            <div class="dropdown">
+                <button>اختر كلية</button>
+                <div class="dropdown-content">
+                    <a href="Faculty teb.html">كلية الطب</a>
+                    <a href="Faculty of Nursing.html"> كلية التمريض </a>
+                    <a href="Faculty of Pharmacy.html">كلية الصيدلة</a>
+                    <a href="Faculty of Veterinary Medicine.html">كلية الطب البيطري </a>
+                    <a href="Faculty of Science.html">كلية  العلوم</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>الكليات الهندسية</h3>
+            <div class="dropdown">
+                <button>اختر كلية</button>
+                <div class="dropdown-content">
+                    <a href="Faculty of Engineering.html">كلية الهندسة</a>
+                    <a href="Faculty of Computers and Information.html">كلية الحاسبات والمعلومات </a>
+                    <a href="Faculty of Computers.html">كلية التكنولوجيا والتنمية </a>
+                    <a href="Faculty of Agriculture.html">كلية الزراعة </a>
+                    <a href="Faculty of Commerce.html">كلية التجارة </a>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="container" id="form-container" style="display: none;">
-        <h2>إدخال اسم فورم الغياب</h2>
-        <input type="text" id="formName" placeholder="أدخل اسم فورم الغياب">
-        <button onclick="fetchFormData()">عرض</button>
-        <div id="form-content"></div>
-        <button onclick="sendFormData()">إرسال</button>
-    </div>
-
-    <script>
-       const targetLat = 30.595612435421916;  
-        const targetLon = 31.510278862438106;
-        const tolerance = 0.5;
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError, {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                });
-            } else {
-                document.getElementById("location").innerText = "المتصفح لا يدعم تحديد الموقع.";
-            }
-        }
-
-        function showPosition(position) {
-            let lat = position.coords.latitude;
-            let lon = position.coords.longitude;
-            document.getElementById("location").innerText = `إحداثياتك: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-            
-            let distance = getDistance(lat, lon, targetLat, targetLon);
-            if (distance <= tolerance) {
-                document.getElementById("form-container").style.display = "block";
-            } else {
-                document.getElementById("location").innerText += "أنت خارج النطاق المسموح به.";
-            }
-        }
-
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
-
-        function showError(error) {
-            document.getElementById("location").innerText = "تعذر تحديد الموقع.";
-        }
-
-        function fetchFormData() {
-            let formName = document.getElementById("formName").value;
-            if (!formName) {
-                alert("يرجى إدخال اسم فورم الغياب");
-                return;
-            }
-            fetch(`https://firestore.googleapis.com/v1/projects/absence-d1cca/databases/(default)/documents/Absence/${formName}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById("form-content").innerHTML = "<p>\nفورم الغياب غير موجود.</p>";
-                    } else {
-                        let fields = data.fields;
-                        let formHTML = "";
-                        for (let key in fields) {
-                            formHTML += `<label>${key}: <input type='text' id='${key}' value='${fields[key].stringValue || ""}'></label><br>`;
-                        }
-                        document.getElementById("form-content").innerHTML = formHTML;
-                    }
-                })
-                .catch(error => {
-                    console.error("حدث خطأ أثناء جلب البيانات:", error);
-                });
-        }
-
-        function sendFormData() {
-            let formName = document.getElementById("formName").value;
-            let inputs = document.querySelectorAll("#form-content input");
-            let dataToSend = { fields: {} };
-            inputs.forEach(input => {
-                dataToSend.fields[input.id] = { stringValue: input.value };
-            });
-            
-            fetch(`https://firestore.googleapis.com/v1/projects/absence-d1cca/databases/(default)/documents/Absenceout/${formName}/students`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend)
-            }).then(response => response.json())
-            .then(data => {
-                alert("تم إرسال البيانات بنجاح!");
-            }).catch(error => {
-                console.error("خطأ في الإرسال:", error);
-            });
-        }
-
-        window.onload = getLocation;
-    </script>
+    <footer>
+        تم التصميم بواسطة م/ محمد السيد عبد الفتاح
+    </footer>
 </body>
 </html>
