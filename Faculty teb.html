@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحديد الموقع ورفع الغياب</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="location-container">
+        <h2>موقعك الحالي:</h2>
+        <p id="location">جاري تحديد موقعك...</p>
+    </div>
+
+    <div class="container" id="form-container" style="display: none;">
+        <h2>إدخال اسم فورم الغياب</h2>
+        <input type="text" id="formName" placeholder="أدخل اسم فورم الغياب">
+        <button onclick="fetchFormData()">عرض</button>
+        <div id="form-content"></div>
+        <button onclick="sendFormData()">إرسال</button>
+    </div>
+
+    <script>
+       const targetLat = 30.58569068001993; 
+        const targetLon = 31.48730670899979;
+        const tolerance = 0.5;
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            } else {
+                document.getElementById("location").innerText = "المتصفح لا يدعم تحديد الموقع.";
+            }
+        }
+
+        function showPosition(position) {
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
+            document.getElementById("location").innerText = `إحداثياتك: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+            
+            let distance = getDistance(lat, lon, targetLat, targetLon);
+            if (distance <= tolerance) {
+                document.getElementById("form-container").style.display = "block";
+            } else {
+                document.getElementById("location").innerText += "أنت خارج النطاق المسموح به.";
+            }
+        }
+
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function showError(error) {
+            document.getElementById("location").innerText = "تعذر تحديد الموقع.";
+        }
+
+        function fetchFormData() {
+            let formName = document.getElementById("formName").value;
+            if (!formName) {
+                alert("يرجى إدخال اسم فورم الغياب");
+                return;
+            }
+            fetch(`https://firestore.googleapis.com/v1/projects/absence-d1cca/databases/(default)/documents/Absence/${formName}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById("form-content").innerHTML = "<p>\nفورم الغياب غير موجود.</p>";
+                    } else {
+                        let fields = data.fields;
+                        let formHTML = "";
+                        for (let key in fields) {
+                            formHTML += `<label>${key}: <input type='text' id='${key}' value='${fields[key].stringValue || ""}'></label><br>`;
+                        }
+                        document.getElementById("form-content").innerHTML = formHTML;
+                    }
+                })
+                .catch(error => {
+                    console.error("حدث خطأ أثناء جلب البيانات:", error);
+                });
+        }
+
+        function sendFormData() {
+            let formName = document.getElementById("formName").value;
+            let inputs = document.querySelectorAll("#form-content input");
+            let dataToSend = { fields: {} };
+            inputs.forEach(input => {
+                dataToSend.fields[input.id] = { stringValue: input.value };
+            });
+            
+            fetch(`https://firestore.googleapis.com/v1/projects/absence-d1cca/databases/(default)/documents/Absenceout/${formName}/students`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dataToSend)
+            }).then(response => response.json())
+            .then(data => {
+                alert("تم إرسال البيانات بنجاح!");
+            }).catch(error => {
+                console.error("خطأ في الإرسال:", error);
+            });
+        }
+
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
